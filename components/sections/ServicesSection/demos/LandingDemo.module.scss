@@ -1,0 +1,363 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/demo" as *;
+
+@include demo-keyframes;
+
+// cada etapa ocupa ~0.8s a partir de $t-first
+$t-page: 0.2s;
+$t-first: 0.9s;
+$t-step: 0.8s;
+$t-fill: 3.3s;
+$t-result: 4.2s;
+
+.demo {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-right: 110px; // espaço para os marcadores
+
+  @include below($bp-mobile) {
+    padding-right: 96px;
+  }
+}
+
+.stack {
+  position: relative;
+}
+
+.phone {
+  @include card;
+  display: grid;
+  gap: 12px;
+  width: 220px;
+  padding: 18px 16px 20px;
+  border-radius: 22px;
+  @include reveal($t-page, rise);
+
+  @include below($bp-mobile) {
+    width: 190px;
+    padding: 14px 12px 16px;
+  }
+}
+
+// bloco destacado em sua etapa
+.block {
+  position: relative;
+  border-radius: 10px;
+  outline: 1.5px solid transparent;
+  outline-offset: 4px;
+  animation: spotlight 1.3s ease both;
+  animation-delay: calc(#{$t-first} + (var(--step) - 1) * #{$t-step});
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.headline p {
+  color: $ink;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.line {
+  @include skeleton(85%, 5px);
+  margin-top: 8px;
+}
+
+.cta {
+  display: block;
+  padding: 9px;
+  border-radius: 99px;
+  background: $brand-gradient;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.proof {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avatars {
+  display: flex;
+
+  i {
+    width: 18px;
+    height: 18px;
+    margin-right: -6px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #ddd3e8;
+
+    &:nth-child(2) {
+      background: #f0d2e2;
+    }
+
+    &:nth-child(3) {
+      background: #d9d3df;
+    }
+  }
+}
+
+.stars {
+  color: #e2a93b;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+.form {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  background: $offwhite;
+}
+
+.input {
+  display: block;
+  height: 22px;
+  padding: 8px;
+  border: 1px solid rgba($ink, 0.08);
+  border-radius: 6px;
+  background: #fff;
+
+  i {
+    @include skeleton(55%, 5px);
+    background: rgba($purple, 0.35);
+    transform-origin: left;
+    animation: grow-x 0.6s $ease both;
+    animation-delay: $t-fill;
+
+    @include reduced-motion {
+      animation: none;
+    }
+  }
+
+  & + & i {
+    width: 70%;
+    animation-delay: calc(#{$t-fill} + 0.25s);
+  }
+}
+
+.submit {
+  display: block;
+  padding: 6px;
+  border-radius: 6px;
+  background: $purple-dark;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+  animation: submit 0.5s ease both;
+  animation-delay: calc(#{$t-fill} + 0.65s);
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.benefits {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba($purple, 0.4);
+    }
+
+    &::after {
+      content: "";
+      @include skeleton(70%, 5px);
+    }
+  }
+}
+
+// marcador lateral "1 Headline", "2 CTA"...
+.marker {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 26px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 5px;
+  border: 1px solid rgba($purple, 0.2);
+  border-radius: 99px;
+  background: #fff;
+  color: $ink;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px -12px rgba($ink, 0.3);
+  transform: translateY(-50%);
+  animation: marker 0.45s $ease both;
+  animation-delay: calc(#{$t-first} + (var(--step) - 1) * #{$t-step});
+
+  // linha conectando o marcador ao bloco
+  &::before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: 20px;
+    border-top: 1px dashed rgba($purple, 0.5);
+  }
+
+  b {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: $purple;
+    color: #fff;
+    font-size: 0.6rem;
+  }
+
+  @include below($bp-mobile) {
+    left: calc(100% + 18px);
+
+    &::before {
+      width: 14px;
+    }
+  }
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+// resultado final
+.result {
+  position: absolute;
+  right: -112px;
+  bottom: -14px;
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: $purple-dark;
+  color: #fff;
+  box-shadow: 0 18px 34px -16px rgba($purple, 0.7);
+  @include reveal($t-result, pop, 0.5s);
+
+  strong {
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  @include below($bp-mobile) {
+    right: -96px;
+    padding: 10px 14px;
+  }
+}
+
+.resultLabel {
+  color: rgba(#fff, 0.6);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.arrow {
+  color: #d9a6e6;
+}
+
+.leads {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: rgba(#fff, 0.12);
+  font-size: 0.65rem;
+}
+
+@keyframes spotlight {
+  0% {
+    outline-color: transparent;
+  }
+  25%,
+  70% {
+    outline-color: rgba($purple, 0.55);
+    background-color: rgba($purple, 0.05);
+  }
+  100% {
+    outline-color: rgba($purple, 0.12);
+  }
+}
+
+@keyframes marker {
+  from {
+    opacity: 0;
+    transform: translate(-8px, -50%);
+  }
+}
+
+@keyframes submit {
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    background: $purple-deep;
+  }
+}
+
+// Telas muito estreitas (até ~380px): celular e marcadores compactos
+@media (max-width: 380px) {
+  .demo {
+    padding-right: 84px;
+  }
+
+  .phone {
+    width: 164px;
+    gap: 10px;
+    padding: 12px 10px 14px;
+  }
+
+  .headline p {
+    font-size: 0.82rem;
+  }
+
+  .marker {
+    left: calc(100% + 12px);
+    gap: 4px;
+    padding: 4px 8px 4px 4px;
+    font-size: 0.6rem;
+
+    &::before {
+      width: 8px;
+    }
+
+    b {
+      width: 14px;
+      height: 14px;
+      font-size: 0.55rem;
+    }
+  }
+
+  .result {
+    right: -82px;
+    padding: 8px 10px;
+
+    strong {
+      font-size: 1.05rem;
+    }
+  }
+}

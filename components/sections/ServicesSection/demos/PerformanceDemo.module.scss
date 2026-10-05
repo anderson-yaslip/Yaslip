@@ -1,0 +1,265 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/demo" as *;
+
+@include demo-keyframes;
+
+$t-load: 0.3s;
+$t-page: 1.2s;
+$t-report: 1.5s;
+$t-gauge: 1.7s;
+$t-checks: 2.3s;
+$t-done: 4.3s;
+$green: #2f9e6b;
+
+.demo {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 420px;
+}
+
+// navegador carregando
+.browser {
+  @include card;
+  overflow: hidden;
+  @include reveal(0.1s);
+}
+
+.chrome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fbf9fc;
+}
+
+.url {
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: #f1edf4;
+  color: $ink-soft;
+  font-size: 0.68rem;
+}
+
+.time {
+  color: $green;
+  font-size: 0.7rem;
+  font-weight: 700;
+  @include reveal($t-page, fade, 0.3s);
+}
+
+.loader {
+  display: block;
+  height: 2px;
+  background: $brand-gradient;
+  transform-origin: left;
+  animation: load 0.9s cubic-bezier(0.3, 0.6, 0.3, 1) both;
+  animation-delay: $t-load;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.page {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.block {
+  display: block;
+  height: 46px;
+  border-radius: 8px;
+  background: linear-gradient(120deg, #efe6f6, #f8e8ef);
+  @include reveal($t-page, fade, 0.35s);
+}
+
+.lines {
+  display: grid;
+  gap: 6px;
+  @include reveal(calc(#{$t-page} + 0.1s), fade, 0.35s);
+
+  i {
+    @include skeleton;
+
+    &:last-child {
+      width: 60%;
+    }
+  }
+}
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  @include reveal(calc(#{$t-page} + 0.2s), fade, 0.35s);
+
+  i {
+    height: 26px;
+    border-radius: 6px;
+    background: #f1edf4;
+  }
+}
+
+// relatório: indicador circular + checklist
+.report {
+  @include card;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 16px 20px;
+  @include reveal($t-report);
+}
+
+.gauge {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+
+  svg {
+    transform: rotate(-90deg);
+  }
+}
+
+.gaugeTrack,
+.gaugeFill {
+  fill: none;
+  stroke-width: 6;
+}
+
+.gaugeTrack {
+  stroke: #efedf2;
+}
+
+.gaugeFill {
+  stroke: url(#perf-gradient);
+  stroke-linecap: round;
+  stroke-dasharray: var(--circ);
+  stroke-dashoffset: var(--target);
+  animation: gauge 1.4s $ease both;
+  animation-delay: $t-gauge;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.score {
+  position: absolute;
+  color: $ink;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: $ink;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+}
+
+.tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: $green;
+  animation: tick 0.4s $ease both;
+  animation-delay: calc(#{$t-checks} + var(--i) * 0.5s);
+
+  svg {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.done {
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 99px;
+  background: $purple-dark;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 14px 30px -14px rgba($ink, 0.5);
+  transform: translateX(-50%);
+  animation: done 0.5s $ease both;
+  animation-delay: $t-done;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+@keyframes load {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes gauge {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+}
+
+@keyframes tick {
+  from {
+    background: #e4dfe9;
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes done {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.9);
+  }
+}
+
+@include below($bp-mobile) {
+  .report {
+    gap: 14px;
+    padding: 14px 14px 28px;
+  }
+
+  .checks {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+}

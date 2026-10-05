@@ -1,0 +1,249 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/demo" as *;
+
+@include demo-keyframes;
+
+$t-chart: 0.5s;
+$t-metrics: 0.9s;
+$t-growth: 2.2s;
+$t-flow: 2.8s;
+$t-node-step: 0.5s;
+$green: #2f9e6b;
+
+.demo {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.panel {
+  @include card;
+  padding: 16px;
+  @include reveal(0.1s);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba($ink, 0.06);
+}
+
+.live {
+  position: relative;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: $green;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: $green;
+    animation: live 1.6s ease-out infinite;
+
+    @include reduced-motion {
+      animation: none;
+    }
+  }
+}
+
+.headText {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    color: $ink;
+    font-size: 0.85rem;
+  }
+
+  span {
+    overflow: hidden;
+    color: $muted;
+    font-size: 0.68rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.growth {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba($green, 0.12);
+  color: $green;
+  font-size: 0.72rem;
+  font-weight: 700;
+  @include reveal($t-growth, pop, 0.4s);
+}
+
+// gráfico de crescimento (linha desenhada + área)
+.chart {
+  display: block;
+  width: 100%;
+  height: 58px;
+  margin-bottom: 14px;
+  overflow: visible;
+}
+
+.trend {
+  fill: none;
+  stroke: $purple;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: draw 1.6s $ease both;
+  animation-delay: $t-chart;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.area {
+  fill: url(#organic-area);
+  @include reveal(calc(#{$t-chart} + 0.8s), fade, 0.8s);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metric {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba($ink, 0.06);
+  border-radius: 10px;
+  background: $offwhite;
+  @include reveal(calc(#{$t-metrics} + var(--i) * 0.2s), pop, 0.45s);
+}
+
+.metricLabel {
+  color: $ink-soft;
+  font-size: 0.65rem;
+}
+
+.metricValue {
+  color: $ink;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.highlight {
+  border-color: rgba($magenta, 0.25);
+  background: #fbf3f8;
+
+  .metricValue {
+    color: $magenta;
+  }
+}
+
+// caminho Conteúdo → Lead
+.flow {
+  @include card;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 16px 10px 14px;
+  @include reveal(calc(#{$t-flow} - 0.3s));
+}
+
+.track {
+  position: absolute;
+  top: 25px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: #e9e4ee;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: $brand-gradient;
+  transform-origin: left;
+  animation: grow-x calc(#{$t-node-step} * 3) linear both;
+  animation-delay: $t-flow;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.node {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: $ink-soft;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-align: center;
+  animation: node-on 0.3s ease both;
+  animation-delay: calc(#{$t-flow} + var(--i) * #{$t-node-step});
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.nodeDot {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: $purple;
+  box-shadow: 0 0 0 1px rgba($purple, 0.3);
+  animation: dot-on 0.4s $ease both;
+  animation-delay: inherit;
+
+  .node:last-child & {
+    background: $magenta;
+    box-shadow: 0 0 0 5px rgba($magenta, 0.15);
+  }
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+@keyframes node-on {
+  from {
+    color: $muted;
+  }
+}
+
+@keyframes dot-on {
+  from {
+    background: #e0dae6;
+    box-shadow: 0 0 0 1px transparent;
+    transform: scale(0.7);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes live {
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}

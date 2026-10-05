@@ -1,0 +1,66 @@
+// Posição definida pela coluna em FloatingActions.
+.float {
+  --size: 60px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 10px 26px -8px rgba(37, 211, 102, 0.7);
+  transition:
+    transform 0.3s var(--ease-out),
+    box-shadow 0.3s;
+
+  svg {
+    width: 52%;
+    height: 52%;
+  }
+
+  // Pulso suave para chamar atenção sem incomodar.
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid #25d366;
+    animation: waPulse 2.4s ease-out infinite;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: scale(1.06);
+    box-shadow: 0 14px 30px -8px rgba(37, 211, 102, 0.8);
+  }
+}
+
+@keyframes waPulse {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .float {
+    --size: 58px;
+  }
+}
+
+@media (max-width: 600px) {
+  .float {
+    --size: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float::after {
+    animation: none;
+  }
+}

@@ -1,0 +1,1004 @@
+// =========================================================
+// DigitalFlow — jornada do visitante em uma "plataforma"
+// 1. Seção e cabeçalho   2. Janela   3. Navegação das etapas
+// 4. Módulos (estados)   5. Conteúdo dos módulos   6. Conectores
+// 7. Feed de atividade   8. Animações   9. Responsivo
+//
+// Estados (data-state): pending → active → done
+// - pending: módulo apagado, conteúdo oculto
+// - active : destaque roxo, conteúdo anima (delays em --d)
+// - done   : estado final, sem animação
+// =========================================================
+@use "../../../styles/tokens" as *;
+@use "../../../styles/demo" as demo;
+
+$gap: 40px; // espaço entre módulos (= largura do conector)
+$green: #23824f;
+
+// ---------- 1. Seção e cabeçalho ----------
+.flow {
+  padding-block: clamp(72px, 10vw, 140px);
+  // mesmo fundo escuro da HeroSection
+  background:
+    radial-gradient(circle at 50% 50%, rgba($mauve, 0.3), transparent 45%),
+    $purple-dark;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px 64px;
+  align-items: end;
+  margin-bottom: clamp(32px, 5vw, 56px);
+}
+
+.title {
+  max-width: 16ch;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.description {
+  max-width: 40ch;
+  justify-self: end;
+  color: rgba(#fff, 0.72);
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  line-height: 1.55;
+}
+
+// entrada: título → texto → painel
+.title,
+.description,
+.window {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s $ease;
+
+  .entered & {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.description {
+  transition-delay: 0.12s;
+}
+
+.window {
+  transition-delay: 0.25s;
+}
+
+// ---------- 2. Janela ----------
+.window {
+  overflow: hidden;
+  border: 1px solid rgba(#fff, 0.12);
+  border-radius: 18px;
+  background: $paper;
+  box-shadow:
+    0 0 0 6px rgba(#fff, 0.04),
+    0 40px 90px -40px rgba(#000, 0.55);
+}
+
+.windowBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid $line;
+  background: #fbf9fc;
+}
+
+.windowDots {
+  display: flex;
+  gap: 6px;
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e4dfe9;
+  }
+}
+
+.windowTitle {
+  flex: 1;
+  color: $ink-soft;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.livePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: rgba($vibrant, 0.07);
+  color: $purple;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.live {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $vibrant;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: $vibrant;
+    animation: ping 1.8s ease-out infinite;
+  }
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+// ---------- 3. Navegação das etapas ----------
+.nav {
+  position: relative;
+  padding: 20px 14px;
+  border-right: 1px solid $line;
+  background: #fcfbfd;
+
+  ol {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+}
+
+// lista + trilho (o trilho é medido a partir da lista, não do painel)
+.steps {
+  position: relative;
+}
+
+// trilho vertical ligando os ícones (preenche conforme --progress)
+.rail {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 24px;
+  width: 2px;
+  background: $line;
+}
+
+.railFill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, $purple, $vibrant);
+  transform: scaleY(var(--progress));
+  transform-origin: top;
+  transition: transform 0.8s $ease;
+}
+
+.railDot {
+  position: absolute;
+  top: calc(var(--progress) * 100%);
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $vibrant;
+  box-shadow: 0 0 0 4px rgba($vibrant, 0.18);
+  transform: translate(-50%, -50%);
+  transition: top 0.8s $ease;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: $muted;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+
+  &:hover:not([data-state="active"]) {
+    color: $ink-soft;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $vibrant;
+    outline-offset: 2px;
+  }
+
+  &[data-state="done"] {
+    color: $ink-soft;
+  }
+
+  &[data-state="active"] {
+    background: rgba($vibrant, 0.06);
+    color: $ink;
+  }
+}
+
+.navIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid $line;
+  border-radius: 50%;
+  background: $paper;
+  color: $muted;
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease;
+
+  [data-state="done"] > & {
+    border-color: transparent;
+    background: $purple;
+    color: #fff;
+  }
+
+  [data-state="active"] > & {
+    border-color: $vibrant;
+    color: $vibrant;
+    box-shadow: 0 0 0 4px rgba($vibrant, 0.12);
+  }
+}
+
+.navText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  small {
+    color: $muted;
+    font-size: 0.72rem;
+  }
+}
+
+// ---------- 4. Módulos (estados) ----------
+.main {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+  background: linear-gradient(180deg, #fdfcfe, $paper);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: $gap;
+}
+
+.slot {
+  position: relative;
+  display: flex;
+}
+
+.module {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 236px;
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid $line;
+  border-radius: 14px;
+  background: $paper;
+  box-shadow: 0 10px 24px -20px rgba($purple-dark, 0.4);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s $ease,
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
+
+  &[data-state="pending"] {
+    opacity: 0.45;
+  }
+
+  &[data-state="active"] {
+    border-color: rgba($vibrant, 0.45);
+    box-shadow:
+      0 0 0 4px rgba($vibrant, 0.07),
+      0 22px 44px -24px rgba($vibrant, 0.45);
+    transform: translateY(-3px);
+  }
+}
+
+.modHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $muted;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  transition: color 0.4s ease;
+
+  [data-state="active"] > & {
+    color: $vibrant;
+  }
+}
+
+.modIcon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: $bg-soft;
+  color: $purple;
+}
+
+// revelação genérica dos elementos internos
+.reveal {
+  [data-state="pending"] & {
+    opacity: 0;
+  }
+
+  [data-state="active"] & {
+    animation: reveal 0.5s $ease both;
+    animation-delay: var(--d, 0s);
+  }
+}
+
+.modTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: $ink;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: $bg-soft;
+  color: $purple;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.chipStrong {
+  background: rgba($vibrant, 0.1);
+  color: $vibrant;
+}
+
+.chipDone {
+  background: #e8f6ee;
+  color: $green;
+}
+
+// ---------- 5. Conteúdo dos módulos ----------
+// Análise
+.sources {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    align-items: center;
+    gap: 8px;
+    color: $ink-soft;
+    font-size: 0.72rem;
+  }
+}
+
+.meter {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #efe9f4;
+
+  b {
+    display: block;
+    width: calc(var(--level) * 100%);
+    height: 100%;
+    border-radius: inherit;
+    background: $brand-gradient;
+    transform-origin: left;
+
+    [data-state="pending"] & {
+      transform: scaleX(0);
+    }
+
+    [data-state="active"] & {
+      animation: grow-x 0.8s $ease both;
+      animation-delay: calc(0.2s + var(--i) * 0.15s);
+    }
+  }
+}
+
+// linha de varredura (análise) percorrendo o módulo de cima a baixo
+.scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: 0;
+    left: 0;
+    height: 30%;
+    border-bottom: 1.5px solid rgba($vibrant, 0.45);
+    background: linear-gradient(180deg, transparent, rgba($vibrant, 0.07));
+  }
+
+  [data-state="active"] > & {
+    opacity: 1;
+    animation: scan 2.2s ease-in-out infinite;
+  }
+}
+
+// Desenvolvimento
+.browser {
+  overflow: hidden;
+  border: 1px solid $line;
+  border-radius: 10px;
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid $line;
+  background: #fbf9fc;
+
+  i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e4dfe9;
+  }
+
+  span {
+    flex: 1;
+    min-width: 0;
+    margin-left: 6px;
+    padding: 2px 8px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: #f1edf4;
+    color: $muted;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.page {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+}
+
+.pageTitle {
+  color: $ink;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.skeleton {
+  display: block;
+  height: 5px;
+  border-radius: 99px;
+  background: #ece7f0;
+}
+
+.short {
+  width: 60%;
+}
+
+.pageButton {
+  justify-self: start;
+  margin-top: 3px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  background: $purple-dark;
+  color: #fff;
+  font-size: 0.64rem;
+  font-weight: 600;
+}
+
+// Estratégia
+.actions {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: $ink-soft;
+    font-size: 0.74rem;
+  }
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid $purple;
+  border-radius: 50%;
+  background: $purple;
+  color: #fff;
+
+  [data-state="pending"] &,
+  [data-state="active"] & {
+    border-color: $line;
+    background: $paper;
+    color: transparent;
+  }
+
+  [data-state="active"] & {
+    animation: tick 0.35s $ease forwards;
+    animation-delay: var(--d);
+  }
+}
+
+// Site no ar
+.contactHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  strong {
+    display: block;
+    color: $ink;
+    font-size: 0.85rem;
+  }
+
+  small {
+    color: $muted;
+    font-size: 0.7rem;
+  }
+}
+
+.online {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: $green;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba($green, 0.14);
+}
+
+.bubble {
+  padding: 10px 12px;
+  border-radius: 12px 12px 12px 4px;
+  background: $bg-soft;
+  color: $ink;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+// ---------- 6. Conectores ----------
+.connector {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  z-index: 2;
+  width: $gap;
+  height: 2px;
+  margin-top: -1px;
+  background: $line;
+}
+
+.connectorFill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, $purple, $vibrant);
+  transform: scaleX(0);
+  transform-origin: left;
+
+  [data-state="lit"] > & {
+    transform: scaleX(1);
+  }
+
+  [data-state="flowing"] > & {
+    animation: grow-x 0.8s $ease forwards;
+  }
+}
+
+// o "visitante" atravessa a conexão
+.connectorTrack {
+  position: absolute;
+  inset: 0;
+  display: none;
+
+  [data-state="flowing"] > & {
+    display: block;
+    animation: travel 0.8s $ease both;
+  }
+
+  i {
+    position: absolute;
+    top: 50%;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $vibrant;
+    box-shadow: 0 0 0 4px rgba($vibrant, 0.2);
+    transform: translateY(-50%);
+  }
+}
+
+// ---------- 7. Feed de atividade ----------
+.feed {
+  padding: 12px 16px 14px;
+  border: 1px solid $line;
+  border-radius: 14px;
+  background: #fbf9fc;
+
+  ol {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 1px;
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s $ease;
+
+    &[data-state="pending"] {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  strong {
+    color: $ink;
+    font-size: 0.76rem;
+    font-weight: 600;
+  }
+
+  time {
+    grid-column: 2;
+    color: $muted;
+    font-size: 0.64rem;
+  }
+}
+
+.feedTitle {
+  margin-bottom: 10px;
+  color: $muted;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.feedDot {
+  position: relative;
+  grid-row: span 3;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $purple;
+
+  [data-state="active"] > & {
+    background: $vibrant;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: $vibrant;
+      animation: ping 1.6s ease-out infinite;
+    }
+  }
+}
+
+.feedDetail {
+  grid-column: 2;
+  color: $ink-soft;
+  font-size: 0.68rem;
+}
+
+// pausa as animações fora da tela
+.paused * {
+  animation-play-state: paused !important;
+}
+
+// ---------- 8. Animações ----------
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes scan {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(130%);
+  }
+}
+
+@keyframes travel {
+  from {
+    transform: translateX(-100%);
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tick {
+  to {
+    border-color: $vibrant;
+    background: $vibrant;
+    color: #fff;
+  }
+}
+
+@keyframes ping {
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes slot-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@include demo.reduced-motion {
+  .title,
+  .description,
+  .window {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .module,
+  .module *,
+  .connector *,
+  .live::after,
+  .feedDot::after {
+    animation: none !important;
+  }
+
+  .scan,
+  .connectorTrack {
+    display: none !important;
+  }
+
+  .module[data-state="active"] .check {
+    border-color: $vibrant;
+    background: $vibrant;
+    color: #fff;
+  }
+}
+
+// ---------- 9. Responsivo ----------
+// Tablet: navegação horizontal no topo, módulos em 2x2
+@include demo.below($bp-tablet) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nav {
+    padding: 10px 12px 14px;
+    border-right: 0;
+    border-bottom: 1px solid $line;
+
+    ol {
+      flex-direction: row;
+      gap: 4px;
+    }
+
+    li {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  // trilho vira barra de progresso horizontal
+  .rail {
+    top: auto;
+    right: 0;
+    bottom: -9px;
+    left: 0;
+    width: auto;
+    height: 2px;
+  }
+
+  .railFill {
+    transform: scaleX(var(--progress));
+    transform-origin: left;
+  }
+
+  .railDot {
+    top: 50%;
+    left: calc(var(--progress) * 100%);
+    transition: left 0.8s $ease;
+  }
+
+  .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .connector {
+    display: none;
+  }
+
+  .feed ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// Mobile: uma etapa por vez
+@include demo.below($bp-mobile) {
+  .header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .description {
+    justify-self: start;
+  }
+
+  .windowTitle {
+    text-align: left;
+    font-size: 0.72rem;
+  }
+
+  .nav {
+    padding-inline: 8px;
+
+    ol {
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    li {
+      flex: 1 0 auto;
+    }
+  }
+
+  .navItem {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .navIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .navText {
+    strong {
+      font-size: 0.8rem;
+    }
+
+    small {
+      display: none;
+    }
+  }
+
+  .main {
+    padding: 16px;
+  }
+
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .slot:not([data-state="active"]) {
+    display: none;
+  }
+
+  .slot[data-state="active"] {
+    animation: slot-in 0.45s $ease both;
+  }
+
+  .module {
+    min-height: 250px;
+
+    &[data-state="active"] {
+      transform: none;
+    }
+  }
+
+  .feed {
+    display: none;
+  }
+}

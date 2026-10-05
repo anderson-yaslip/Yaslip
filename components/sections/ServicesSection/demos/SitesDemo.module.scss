@@ -1,0 +1,299 @@
+@use "../../../../styles/tokens" as *;
+@use "../../../../styles/demo" as *;
+
+@include demo-keyframes;
+
+// linha do tempo (s)
+$t-header: 0.35s;
+$t-title: 0.8s;
+$t-text: 1.25s;
+$t-cta: 1.7s;
+$t-visual: 2.1s;
+$t-cursor: 2.8s;
+$t-click: 4s;
+$t-toast: 4.35s;
+
+.demo {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+}
+
+.browser {
+  @include card;
+  overflow: hidden;
+}
+
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba($ink, 0.06);
+  background: #fbf9fc;
+}
+
+.dots {
+  display: flex;
+  gap: 5px;
+
+  i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e4dfe9;
+  }
+}
+
+.url {
+  flex: 1;
+  max-width: 220px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: #f1edf4;
+  color: $ink-soft;
+  font-size: 0.7rem;
+}
+
+.page {
+  position: relative;
+  min-height: 230px;
+  padding: 16px 20px 22px;
+}
+
+.empty {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba($ink, 0.14);
+  border-radius: 10px;
+  color: $muted;
+  font-size: 0.75rem;
+  animation: vanish 0.4s ease forwards;
+  animation-delay: $t-header;
+
+  @include reduced-motion {
+    display: none;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  @include reveal($t-header, fade);
+}
+
+.logo {
+  width: 54px;
+  height: 12px;
+  border-radius: 4px;
+  background: $brand-gradient;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+
+  i {
+    @include skeleton(28px, 5px);
+  }
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.title {
+  color: $ink;
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  @include reveal($t-title);
+}
+
+.text {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 16px;
+  @include reveal($t-text);
+
+  i {
+    @include skeleton;
+
+    &:last-child {
+      width: 70%;
+    }
+  }
+}
+
+.ctaWrap {
+  position: relative;
+  display: inline-block;
+  @include reveal($t-cta, pop);
+}
+
+.cta {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 99px;
+  background: $purple-dark;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: press 0.35s ease both;
+  animation-delay: $t-click;
+
+  @include reduced-motion {
+    animation: none;
+  }
+}
+
+.ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 99px;
+  border: 2px solid $vibrant;
+  opacity: 0;
+  animation: ripple 0.8s ease-out forwards;
+  animation-delay: $t-click;
+
+  @include reduced-motion {
+    display: none;
+  }
+}
+
+.cursor {
+  position: absolute;
+  left: 62%;
+  top: 55%;
+  fill: $ink;
+  stroke: #fff;
+  stroke-width: 1.2;
+  filter: drop-shadow(0 2px 3px rgba($ink, 0.25));
+  animation: cursor 1.6s $ease both;
+  animation-delay: $t-cursor;
+
+  @include reduced-motion {
+    display: none;
+  }
+}
+
+.visual {
+  position: relative;
+  aspect-ratio: 1 / 0.9;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #efe6f6, #f8e8ef);
+  @include reveal($t-visual, pop);
+}
+
+.sun {
+  position: absolute;
+  top: 18%;
+  right: 20%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: $magenta;
+  opacity: 0.55;
+}
+
+.hill {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -40%;
+  height: 80%;
+  border-radius: 50%;
+  background: $purple;
+  opacity: 0.35;
+}
+
+.toast {
+  position: absolute;
+  right: -10px;
+  bottom: -18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff;
+  color: $ink;
+  font-size: 0.78rem;
+  font-weight: 500;
+  box-shadow: 0 14px 30px -14px rgba($ink, 0.35);
+  @include reveal($t-toast, pop, 0.45s);
+
+  @include below($bp-mobile) {
+    right: 8px;
+  }
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: $brand-gradient;
+  color: #fff;
+  font-size: 0.65rem;
+}
+
+@keyframes vanish {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@keyframes cursor {
+  0% {
+    opacity: 0;
+    transform: translate(110px, 70px);
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    transform: translate(0, 0);
+  }
+  80% {
+    transform: translate(0, 0) scale(0.85);
+  }
+  90%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes press {
+  50% {
+    transform: scale(0.94);
+    background: $purple-deep;
+  }
+  100% {
+    background: $purple-deep;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35, 1.8);
+  }
+}

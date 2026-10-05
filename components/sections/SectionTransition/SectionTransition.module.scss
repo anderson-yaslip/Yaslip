@@ -1,0 +1,131 @@
+// Cor de fundo que aparece ao redor da primeira seção enquanto ela encolhe.
+// É a mesma da seção roxa, para as duas parecerem conectadas.
+$stage-bg:
+  radial-gradient(50% 40% at 50% 50%, rgba(146, 52, 170, 0.45), transparent 75%),
+  #3b2756;
+
+.wrapper {
+  position: relative;
+  background: #3b2756;
+}
+
+.track {
+  position: relative;
+  // Distância de scroll em que a transformação acontece.
+  height: calc(100svh + 80svh);
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: $stage-bg;
+  z-index: 1;
+}
+
+.frame,
+.shadow {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, var(--shift, 0px), 0);
+  will-change: transform;
+}
+
+.frame {
+  overflow: hidden;
+  clip-path: inset(var(--inset-y, 0%) var(--inset-x, 0%) round var(--radius, 0px));
+  will-change: transform, clip-path;
+
+  // Conteúdo centralizado exatamente no meio do palco, que é o ponto
+  // em direção ao qual o bloco encolhe.
+  > section {
+    height: 100svh;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+// Sombra suave que acompanha o bloco recortado.
+.shadow {
+  inset: var(--inset-y, 0%) var(--inset-x, 0%);
+  border-radius: var(--radius, 0px);
+  opacity: var(--progress, 0);
+}
+
+.next {
+  position: relative;
+  z-index: 2;
+  // Puxa a seção seguinte para logo abaixo do bloco encolhido.
+  margin-top: -20svh;
+
+  // Só o conteúdo sobe/ganha opacidade; o fundo roxo fica fixo para não abrir buraco.
+  > section > * {
+    transform: translate3d(0, var(--next-y, 0px), 0);
+    opacity: var(--next-opacity, 1);
+    will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 1024px) {
+  .track {
+    height: calc(100svh + 60svh);
+  }
+
+  .next {
+    margin-top: -14svh;
+  }
+}
+
+@media (max-width: 640px) {
+  .track {
+    height: calc(100svh + 40svh);
+  }
+
+  .next {
+    margin-top: -6svh;
+  }
+}
+
+// Sem movimento (reduced motion ou tela baixa demais): fluxo normal.
+.wrapper[data-static="true"] {
+  .track {
+    height: auto;
+  }
+
+  .stage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+
+  .frame {
+    position: relative;
+    clip-path: none;
+    transform: none;
+    will-change: auto;
+
+    // Fluxo normal: volta o respiro do topo (abaixo do cabeçalho fixo).
+    > section {
+      height: auto;
+      min-height: 100svh;
+      padding-top: 100px;
+      padding-bottom: 56px;
+    }
+  }
+
+  .shadow {
+    display: none;
+  }
+
+  .next {
+    margin-top: 0;
+  }
+
+  .next > section > * {
+    transform: none;
+    opacity: 1;
+    will-change: auto;
+  }
+}

@@ -1,0 +1,274 @@
+// Cada pílula se ancora proporcionalmente à sua posição horizontal
+// (0% = borda esquerda, 100% = direita): as dos cantos nunca saem do diagrama.
+// Usado nas duas versões do diagrama.
+@mixin pill-fit {
+  .pill {
+    transform: translate(calc(-1% * var(--pct, 50)), -50%);
+  }
+}
+
+.services {
+  position: relative;
+  padding: clamp(96px, 12vw, 150px) var(--gutter) clamp(80px, 9vw, 120px);
+  color: var(--c-white);
+  background:
+    radial-gradient(50% 45% at 50% 52%, rgba(146, 52, 170, 0.55), transparent 75%),
+    #3b2756;
+  overflow: hidden;
+}
+
+.inner {
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+.head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+  gap: 40px 80px;
+  align-items: start;
+}
+
+.eyebrow {
+  margin-bottom: 18px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ff8ae4;
+}
+
+.title {
+  font-size: clamp(34px, 4.4vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+
+  span {
+    color: var(--c-lilac);
+  }
+}
+
+.lead {
+  padding-top: 42px;
+  font-size: clamp(17px, 1.4vw, 21px);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---------- Diagrama ---------- */
+
+.diagram {
+  @include pill-fit;
+  position: relative;
+  margin-top: clamp(56px, 8vw, 110px);
+  aspect-ratio: 1200 / 440;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.curve {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.24);
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+}
+
+.dot {
+  fill: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+}
+
+.dotAccent {
+  fill: #c973f2;
+  filter: drop-shadow(0 0 6px rgba(201, 115, 242, 0.95));
+}
+
+.pill {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(70, 46, 98, 0.85);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-montserrat), sans-serif;
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-weight: 500;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.pillActive {
+  border-color: transparent;
+  background: #9900cc;
+  color: #fff;
+  box-shadow: 0 0 26px rgba(153, 0, 204, 0.55);
+}
+
+// .orb.center: mais específico que .orb (position: relative), senão o
+// Safari/iPhone deixa o logo preso no topo do diagrama.
+.orb.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Logo central ---------- */
+
+.orb {
+  position: relative;
+  width: clamp(120px, 12vw, 170px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.orbDashed {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(220, 160, 255, 0.45);
+  animation: spin 40s linear infinite;
+}
+
+// Anel que cresce e encolhe em volta do logo ("respiração").
+.orbPulse {
+  position: absolute;
+  inset: -15%;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 180, 255, 0.7);
+  background: radial-gradient(closest-side, transparent 88%, rgba(204, 77, 230, 0.18));
+  box-shadow: 0 0 22px rgba(214, 100, 240, 0.45);
+  animation: breathe 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes breathe {
+  from {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  to {
+    transform: scale(1.16);
+    opacity: 0.4;
+  }
+}
+
+.orbRing {
+  position: absolute;
+  inset: -5%;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #ff4fd8, #9900cc 35%, rgba(153, 0, 204, 0.15) 60%, #66418b 80%, #ff4fd8);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  filter: drop-shadow(0 0 10px rgba(204, 77, 230, 0.7));
+  animation: spin 7s linear infinite;
+}
+
+.orbCore {
+  position: relative;
+  width: 82%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f7f5f9;
+  box-shadow:
+    0 0 0 6px rgba(153, 0, 204, 0.18),
+    0 18px 40px rgba(20, 8, 30, 0.45);
+
+  img {
+    width: 76%;
+    height: auto;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cta {
+  margin-top: clamp(40px, 5vw, 64px);
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- Diagrama vertical (celular) ---------- */
+
+
+.diagramV {
+  @include pill-fit;
+  display: none;
+  aspect-ratio: 440 / 720;
+  // Nunca mais alto que a tela (descontando o header).
+  width: min(100%, 420px, calc((100svh - 120px) * 440 / 720));
+  margin-left: auto;
+  margin-right: auto;
+
+  .pill {
+    font-size: 12px;
+    padding: 7px 13px;
+  }
+
+  // Celular estreito: as duas pílulas de cada ponta ficam uma sobre a outra,
+  // centralizadas, para não se sobreporem.
+  @media (max-width: 400px) {
+    .pillEdge {
+      left: 50% !important;
+      transform: translate(-50%, -50%);
+    }
+
+    .pillEdgeA {
+      margin-top: -19px;
+    }
+
+    .pillEdgeB {
+      margin-top: 19px;
+    }
+  }
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 900px) {
+
+  .head {
+    grid-template-columns: 1fr;
+  }
+
+  .lead {
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .diagram {
+    display: none;
+  }
+
+  .diagramV {
+    display: block;
+    margin-top: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbDashed,
+  .orbPulse,
+  .orbRing {
+    animation: none;
+  }
+
+  .dot,
+  .dotAccent {
+    display: none;
+  }
+}

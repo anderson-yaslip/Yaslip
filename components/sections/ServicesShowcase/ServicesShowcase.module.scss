@@ -1,0 +1,1286 @@
+$line: #ebe7ef;
+$muted-title: #b9b2c3;
+$soft: #8d86a0;
+
+.section {
+  padding: clamp(96px, 11vw, 150px) var(--gutter);
+  background: #fff;
+  // clip (e não hidden) para não quebrar o sticky da lista.
+  overflow-x: clip;
+}
+
+.head {
+  max-width: var(--container);
+  margin: 0 auto clamp(40px, 5vw, 64px);
+}
+
+.eyebrow {
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--c-violet);
+}
+
+.title {
+  max-width: 760px;
+  font-size: clamp(30px, 3.7vw, 50px);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+/* ---------- Layout: lista compacta | gap | demonstração ---------- */
+
+.layout {
+  max-width: var(--container);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(40px, 5.5vw, 96px);
+  // A lista começa no topo do painel e desce com o scroll até a base dele.
+  align-items: start;
+}
+
+.nav {
+  position: sticky;
+  top: 110px;
+}
+
+/* ---------- Lista ---------- */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid $line;
+}
+
+.item {
+  position: relative;
+  border-bottom: 1px solid $line;
+}
+
+// Ícone e título esmaecem conforme se afastam do item ativo.
+.itemButton {
+  opacity: var(--fade, 1);
+  transition: opacity 0.6s var(--ease-out);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 4px;
+  text-align: left;
+}
+
+.key {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--tone, var(--c-deep));
+  color: #fff;
+  transition:
+    background 0.3s,
+    box-shadow 0.3s;
+
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+.itemTitle {
+  font-family: var(--font-nunito), sans-serif;
+  font-size: clamp(15px, 1.2vw, 18px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--tone, var(--c-purple));
+  transition: color 0.3s;
+}
+
+.itemShort {
+  display: none;
+}
+
+.itemButton:hover {
+  opacity: 1;
+
+  .key {
+    box-shadow: 0 6px 14px -8px var(--tone);
+  }
+}
+
+.itemBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-out);
+
+  // O conteúdo (texto + link) recolhe junto quando o item fica inativo.
+  .itemInner {
+    overflow: hidden;
+    padding: 0 4px 0 48px;
+  }
+
+  p {
+    overflow: hidden;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--c-ink-soft);
+  }
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+}
+
+.progressBar {
+  position: absolute;
+  inset: 0;
+  // Do tom do item até o tom do próximo: liga um item ao outro.
+  background: linear-gradient(90deg, var(--tone, var(--c-deep)), var(--tone-next, var(--c-violet)));
+  transform-origin: left;
+  animation-name: fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.active {
+  .key {
+    background: linear-gradient(135deg, var(--tone), var(--tone-next));
+    box-shadow: 0 8px 18px -8px var(--tone);
+  }
+
+  .itemBody {
+    grid-template-rows: 1fr;
+
+    .itemInner {
+      padding-bottom: 18px;
+      margin-top: -6px;
+    }
+  }
+}
+
+.mobileText {
+  display: none;
+}
+
+// Contorno de progresso das abas (só no celular).
+.tabRing {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  rect {
+    fill: none;
+    stroke: var(--tone);
+    // Metade do traço fica fora e é cortada pela aba: sobra 1,5px sobre a borda.
+    stroke-width: 3;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation-name: trace;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.itemCta {
+  margin-top: 8px;
+  color: var(--tone, var(--c-violet)) !important;
+}
+
+/* ---------- Painel ---------- */
+
+.panel {
+  position: relative;
+  // Painel bem mais alto que a lista, dando espaço para ela percorrer.
+  height: clamp(640px, calc(100svh - 110px), 860px);
+  display: grid;
+  place-items: center;
+  padding: 72px clamp(20px, 4vw, 56px) 48px;
+  border: 1px solid $line;
+  transition: background-color 0.6s var(--ease-out);
+}
+
+.corner {
+  position: absolute;
+  z-index: 2;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid #d5cfdc;
+  background: #fff;
+}
+
+.tl {
+  top: -4px;
+  left: -4px;
+}
+
+.tr {
+  top: -4px;
+  right: -4px;
+}
+
+.bl {
+  bottom: -4px;
+  left: -4px;
+}
+
+.br {
+  bottom: -4px;
+  right: -4px;
+}
+
+.replay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  color: #4a4452;
+  transition: background 0.25s;
+
+  &:hover {
+    background: #fff;
+  }
+}
+
+// Troca entre demonstrações: sai com fade + deslocamento, a próxima entra.
+.demoStage {
+  width: 100%;
+  max-width: 460px;
+  transition:
+    opacity 0.26s ease,
+    transform 0.26s ease;
+
+  > * {
+    animation: demoIn 0.5s var(--ease-out);
+  }
+}
+
+.leaving {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+@keyframes demoIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ---------- Peças comuns das demos ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
+}
+
+.in {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.browser {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 24px 50px -28px rgba(62, 42, 93, 0.45),
+    0 1px 3px rgba(62, 42, 93, 0.08);
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f0ecf3;
+
+  i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e6e1ea;
+  }
+
+  span {
+    margin-left: 10px;
+    font-size: 12px;
+    color: $soft;
+  }
+}
+
+.textLine {
+  display: block;
+  height: 8px;
+  width: 90%;
+  border-radius: 4px;
+  background: #efeaf4;
+}
+
+.short {
+  width: 62% !important;
+}
+
+.ctaWrap {
+  position: relative;
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.cta {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--grad-brand);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform 0.15s,
+    box-shadow 0.3s;
+}
+
+.pressed {
+  transform: scale(0.94);
+  box-shadow: 0 0 0 7px rgba(153, 0, 204, 0.16);
+}
+
+.cursor {
+  position: absolute;
+  left: 62%;
+  top: 55%;
+  opacity: 0;
+  transform: translate(150px, 80px);
+  transition:
+    transform 0.9s cubic-bezier(0.5, 0, 0.2, 1),
+    opacity 0.3s;
+}
+
+.cursorOn {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.cursorClick {
+  transform: translate(0, 0) scale(0.85);
+}
+
+/* 01 — Sites */
+
+.sitesBody {
+  padding: 16px 18px 24px;
+}
+
+.siteHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #f3f0f6;
+}
+
+.siteLogo {
+  width: 56px;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #66418b, #9900cc);
+}
+
+.siteNav {
+  display: flex;
+  gap: 8px;
+
+  i {
+    width: 26px;
+    height: 7px;
+    border-radius: 4px;
+    background: #ece7f1;
+  }
+}
+
+.siteHero {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.siteCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  h4 {
+    margin: 0 0 4px;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: var(--c-ink);
+  }
+}
+
+.siteImage {
+  display: grid;
+  place-items: center;
+  height: 150px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f6dce9, #fbeef5);
+  color: #c47fa5;
+}
+
+/* 02 — Landing Pages */
+
+.landing {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.phone {
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 14px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 24px 50px -28px rgba(30, 80, 50, 0.4),
+    0 1px 3px rgba(30, 60, 40, 0.08);
+}
+
+.lpBlock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 10px;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out),
+    outline-color 0.3s,
+    background 0.3s;
+}
+
+.marked {
+  outline-color: var(--c-violet);
+  background: #faf4ff;
+}
+
+.markTag {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 18px);
+  transform: translateY(-50%);
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--c-violet);
+  color: #fff;
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: tagIn 0.35s var(--ease-out);
+
+  &::before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: 14px;
+    height: 1.5px;
+    background: var(--c-violet);
+  }
+}
+
+@keyframes tagIn {
+  from {
+    opacity: 0;
+    transform: translate(-6px, -50%);
+  }
+}
+
+.lpHeadline {
+  display: block;
+  height: 11px;
+  width: 92%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #cdb3ea, #e6d8f6);
+}
+
+.lpCta {
+  align-self: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--grad-brand);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lpForm {
+  padding: 8px;
+  background: #f8f6fa;
+}
+
+.lpInput {
+  height: 18px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #ebe6f0;
+}
+
+.lpSend {
+  height: 18px;
+  border-radius: 6px;
+  background: #3e2a5d;
+}
+
+.lpProof {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.avatars {
+  display: flex;
+
+  i {
+    width: 18px;
+    height: 18px;
+    margin-right: -6px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: #d9c6ec;
+
+    &:nth-child(2) {
+      background: #f2c6dc;
+    }
+
+    &:nth-child(3) {
+      background: #c6dcf2;
+    }
+  }
+}
+
+.stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #f2b400;
+}
+
+.lpBenefits {
+  span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  b {
+    font-size: 10px;
+    color: #2b9a5a;
+  }
+
+  i {
+    height: 6px;
+    width: 70%;
+    border-radius: 3px;
+    background: #efeaf4;
+  }
+}
+
+// Sem card: só o círculo escuro com o ícone e o texto ao lado.
+.conversion {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--c-ink);
+  }
+
+  small {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #2b9a5a;
+  }
+}
+
+.conversionIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1a1323;
+  color: #fff;
+  box-shadow: 0 6px 14px -6px rgba(23, 19, 29, 0.6);
+}
+
+/* 03 — SEO */
+
+.seo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 999px;
+  background: #fff;
+  color: $soft;
+  box-shadow:
+    0 16px 34px -20px rgba(62, 42, 93, 0.4),
+    0 1px 2px rgba(62, 42, 93, 0.06);
+}
+
+.searchText {
+  min-height: 1.2em;
+  font-size: 15px;
+  color: var(--c-ink);
+}
+
+.caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: -0.15em;
+  background: var(--c-violet);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+// Espaço à direita reservado para o selo TOP 1, que fica fora do card.
+.rankList {
+  // Distância entre posições (altura do card + respiro).
+  --row-gap: 80px;
+  position: relative;
+  height: calc(var(--rows) * var(--row-gap));
+  margin-right: 66px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s var(--ease-out),
+    transform 0.5s var(--ease-out);
+}
+
+.result {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(62, 42, 93, 0.07);
+  box-shadow: 0 10px 24px -20px rgba(62, 42, 93, 0.45);
+  transform: translateY(calc(var(--pos) * var(--row-gap)));
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.resultBody {
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2a2233;
+  }
+
+  small {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: $soft;
+  }
+}
+
+.skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  i {
+    display: block;
+    height: 8px;
+    width: 58%;
+    border-radius: 4px;
+    background: #ebe6f0;
+
+    & + i {
+      width: 38%;
+      height: 6px;
+      background: #f2eff5;
+    }
+  }
+}
+
+.resultMine {
+  z-index: 2;
+  padding-left: 16px;
+
+  .resultBody strong {
+    font-size: 13px;
+  }
+
+  .resultBody small {
+    margin-top: 1px;
+    font-size: 11px;
+    font-weight: 400;
+    color: #a39cb0;
+  }
+
+  background: linear-gradient(100deg, #fdf8ff, #f6eafd);
+  border: 1.5px solid rgba(153, 0, 204, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(153, 0, 204, 0.07),
+    0 16px 34px -16px rgba(153, 0, 204, 0.45);
+
+  .resultBody strong {
+    color: var(--c-plum);
+  }
+}
+
+// Selo de posição fora do card da Yaslip.
+.posBadge {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 12px);
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--c-violet);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  box-shadow: 0 6px 16px -8px rgba(153, 0, 204, 0.75);
+  transition:
+    min-width 0.35s var(--ease-out),
+    background 0.35s;
+}
+
+.posTop {
+  min-width: 52px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #66418b, #9900cc);
+}
+
+.posText {
+  display: block;
+  animation: posIn 0.4s var(--ease-out);
+}
+
+@keyframes posIn {
+  from {
+    opacity: 0;
+    transform: translateY(80%);
+  }
+}
+
+/* 04 — Performance */
+
+.perf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  .browser {
+    width: 100%;
+  }
+}
+
+.loadBar {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #9c4e86, #9900cc);
+  transform-origin: left;
+  transition: opacity 0.3s;
+}
+
+.perfPage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.5s var(--ease-out);
+}
+
+.perfTiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 6px;
+
+  i {
+    height: 60px;
+    border-radius: 10px;
+    background: #f6eedf;
+  }
+}
+
+.loadTime {
+  position: absolute;
+  top: 9px;
+  right: 14px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f1ecf6;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-violet);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Indicadores + círculo, alinhados à esquerda */
+
+.perfFoot {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.ringRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Círculo de progresso: preto, contorno branco, número branco */
+
+.ring {
+  position: relative;
+  flex: none;
+  width: 112px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  // Fundo branco; o contorno roxo → rosa faz o contraste.
+  background: #fff;
+  box-shadow:
+    0 16px 30px -14px rgba(62, 42, 93, 0.35),
+    0 0 0 1px rgba(102, 65, 139, 0.08),
+    0 0 26px -6px var(--glow, transparent);
+  transition: box-shadow 0.5s;
+
+  svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); // começa às 12 horas
+  }
+}
+
+.ringTrack,
+.ringFill {
+  fill: none;
+  stroke-width: 6;
+}
+
+.ringTrack {
+  stroke: rgba(102, 65, 139, 0.12);
+}
+
+.ringFill {
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  // Brilho na cor do último indicador ativado.
+  filter: drop-shadow(0 0 4px var(--glow, #9900cc));
+  transition:
+    opacity 0.3s,
+    filter 0.5s;
+}
+
+.ringValue {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  grid-auto-flow: column;
+  align-items: baseline;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--c-deep);
+  font-variant-numeric: tabular-nums;
+
+  span {
+    margin-left: 1px;
+    font-size: 13px;
+    color: var(--c-violet);
+  }
+}
+
+.ringDone {
+  animation: ringDone 0.6s var(--ease-out);
+}
+
+@keyframes ringDone {
+  40% {
+    transform: scale(1.06);
+  }
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  li {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px 7px 8px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(62, 42, 93, 0.08);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #a9a2b4;
+    opacity: 0.7;
+    transition:
+      color 0.4s,
+      border-color 0.4s,
+      background 0.4s,
+      opacity 0.4s;
+  }
+}
+
+.checkIcon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #eeeaf2;
+  color: #fff;
+  font-size: 10px;
+  transition:
+    background 0.4s,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+// Ativo: chip ganha a cor do item, "pula" e solta uma onda em volta.
+.checked {
+  opacity: 1 !important;
+  color: var(--tone) !important;
+  border-color: color-mix(in srgb, var(--tone) 45%, #fff) !important;
+  background: color-mix(in srgb, var(--tone) 8%, #fff) !important;
+  animation: chipPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .checkIcon {
+    background: var(--tone);
+    transform: rotate(-8deg) scale(1.08);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 2px solid var(--tone);
+    opacity: 0;
+    animation: chipRipple 0.8s ease-out;
+    pointer-events: none;
+  }
+}
+
+@keyframes chipPop {
+  40% {
+    transform: translateY(-3px) scale(1.06);
+  }
+}
+
+@keyframes chipRipple {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35, 1.6);
+  }
+}
+
+.ready {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(100deg, #66418b, #9900cc 45%, #e0559a);
+  box-shadow: 0 10px 22px -10px rgba(184, 58, 168, 0.7);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Tablet ---------- */
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(250px, 0.85fr) minmax(0, 1.15fr);
+    gap: 36px;
+  }
+
+  .panel {
+    height: clamp(600px, calc(100svh - 110px), 800px);
+  }
+}
+
+/* ---------- Mobile: barra horizontal + demonstração abaixo ---------- */
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .nav {
+    position: static;
+  }
+
+  .list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    border-top: 0;
+    padding: 2px 2px 4px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .item {
+    position: relative;
+    flex: none;
+    border: 1px solid $line;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .tabRing {
+    display: block;
+  }
+
+  // A linha de baixo dá lugar ao contorno.
+  .progress {
+    display: none;
+  }
+
+  .itemButton {
+    gap: 8px;
+    padding: 7px 14px 7px 7px;
+  }
+
+  .key {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+
+    svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
+  .itemTitle,
+  .itemBody {
+    display: none;
+  }
+
+  .itemShort {
+    display: inline;
+    font-family: var(--font-nunito), sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--tone, var(--c-purple));
+  }
+
+  .active {
+    border-color: color-mix(in srgb, var(--tone) 22%, #fff);
+  }
+
+  .mobileText {
+    display: block;
+    margin-top: 12px;
+    min-height: 3.2em;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--c-ink-soft);
+  }
+
+  .panel {
+    height: auto;
+    min-height: 470px;
+    padding: 60px 16px 28px;
+    overflow: hidden;
+  }
+
+  .replay {
+    top: 12px;
+    right: 12px;
+  }
+
+  .markTag {
+    left: auto;
+    right: calc(100% + 12px);
+
+    &::before {
+      right: auto;
+      left: 100%;
+    }
+  }
+
+  .phone {
+    margin-left: auto;
+  }
+}
+
+// Celular: sem espaço lateral para o selo; o card da Yaslip quebra linha
+// e o TOP 1 fica sobre o canto superior direito dele.
+@media (max-width: 600px) {
+  .rankList {
+    --row-gap: 84px;
+    margin-right: 54px;
+  }
+
+  .posBadge {
+    left: calc(100% + 8px);
+  }
+
+  .result {
+    height: 72px;
+  }
+
+  .resultMine {
+    .resultBody strong,
+    .resultBody small {
+      white-space: normal;
+    }
+
+    .resultBody strong {
+      font-size: 12.5px;
+      line-height: 1.25;
+    }
+
+    .resultBody small {
+      font-size: 10.5px;
+      line-height: 1.3;
+    }
+  }
+
+}
+
+@media (max-width: 420px) {
+  .siteHero {
+    grid-template-columns: 1fr;
+  }
+
+  .siteImage {
+    height: 90px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demoStage > *,
+  .caret,
+  .markTag {
+    animation: none;
+  }
+
+  .demoStage,
+  .result,
+  .panel {
+    transition: none;
+  }
+}

@@ -1,0 +1,32 @@
+.stack {
+  --gap: 14px;
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  // A área vazia da coluna não bloqueia cliques na página.
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .stack {
+    --gap: 12px;
+    right: 20px;
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .stack {
+    right: 16px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+}
