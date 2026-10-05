@@ -73,6 +73,7 @@ export default function Footer() {
   const ref = useRef(null);
   const heroRef = useRef(null);
   const mediaRef = useRef(null);
+  const wordRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
   // Parallax: a imagem anda mais devagar que a rolagem (só transform, via rAF).
@@ -102,6 +103,52 @@ export default function Footer() {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  // Spotlight no "YASLIP": a máscara da camada de luz segue o cursor (só mouse).
+  useEffect(() => {
+    const word = wordRef.current;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return undefined;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let raf = 0;
+    let target = null;
+    let pos = null;
+    const tick = () => {
+      raf = 0;
+      if (!target) return;
+      // Suaviza o movimento; com movimento reduzido, segue o cursor direto.
+      pos = !pos || reduce
+        ? { ...target }
+        : { x: pos.x + (target.x - pos.x) * 0.22, y: pos.y + (target.y - pos.y) * 0.22 };
+      const r = word.getBoundingClientRect();
+      word.style.setProperty("--glow-x", `${(pos.x - r.left).toFixed(1)}px`);
+      word.style.setProperty("--glow-y", `${(pos.y - r.top).toFixed(1)}px`);
+      if (Math.abs(target.x - pos.x) > 0.5 || Math.abs(target.y - pos.y) > 0.5) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    const onMove = (e) => {
+      target = { x: e.clientX, y: e.clientY };
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onEnter = (e) => {
+      // Começa já na posição do cursor, sem "deslizar" da posição anterior.
+      pos = null;
+      onMove(e);
+      word.classList.add(styles.wordLit);
+    };
+    const onLeave = () => word.classList.remove(styles.wordLit);
+
+    word.addEventListener("pointerenter", onEnter);
+    word.addEventListener("pointermove", onMove);
+    word.addEventListener("pointerleave", onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      word.removeEventListener("pointerenter", onEnter);
+      word.removeEventListener("pointermove", onMove);
+      word.removeEventListener("pointerleave", onLeave);
     };
   }, []);
 
@@ -238,8 +285,9 @@ export default function Footer() {
       </div>
 
       {/* ---------- Palavra gigante ---------- */}
-      <div className={styles.word} aria-hidden="true">
-        YASLIP
+      <div ref={wordRef} className={styles.word} aria-hidden="true">
+        <span className={styles.wordBase}>YASLIP</span>
+        <span className={styles.wordGlow}>YASLIP</span>
       </div>
     </footer>
   );

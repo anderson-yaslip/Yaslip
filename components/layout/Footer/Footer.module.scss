@@ -371,6 +371,7 @@ $text-soft: rgba(255, 255, 255, 0.68);
 /* ---------- Palavra gigante ---------- */
 
 .word {
+  position: relative;
   margin-top: clamp(12px, 2vw, 28px);
   // Base cortada: a palavra "afunda" no fim do rodapé.
   margin-bottom: -0.12em;
@@ -384,6 +385,10 @@ $text-soft: rgba(255, 255, 255, 0.68);
   line-height: 0.8;
   letter-spacing: -0.035em;
   user-select: none;
+}
+
+.wordBase {
+  display: block;
   // Degradê roxo de baixa intensidade, movendo devagar.
   background: linear-gradient(
     100deg,
@@ -399,6 +404,39 @@ $text-soft: rgba(255, 255, 255, 0.68);
   color: transparent;
   opacity: 0.55;
   animation: wordShift 14s ease-in-out infinite alternate;
+}
+
+// Segunda camada idêntica: texto lilás mais claro revelado só perto do
+// cursor por uma máscara radial (o recorte no texto mantém o formato das letras).
+.wordGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    rgba(196, 160, 255, 0.85) 0%,
+    rgba(232, 214, 255, 0.95) 50%,
+    rgba(196, 160, 255, 0.85) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  $glow-mask: radial-gradient(
+    circle 0.85em at var(--glow-x, 50%) var(--glow-y, 50%),
+    #000 0%,
+    rgba(0, 0, 0, 0.55) 30%,
+    rgba(0, 0, 0, 0.18) 60%,
+    transparent 100%
+  );
+  -webkit-mask-image: $glow-mask;
+  mask-image: $glow-mask;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.wordLit .wordGlow {
+  opacity: 0.6;
+  transition-duration: 0.35s;
 }
 
 @keyframes wordShift {
@@ -503,7 +541,11 @@ $text-soft: rgba(255, 255, 255, 0.68);
     transition: none;
   }
 
-  .word {
+  .wordBase {
     animation: none;
+  }
+
+  .wordGlow {
+    transition: none;
   }
 }
